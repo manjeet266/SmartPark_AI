@@ -3,7 +3,7 @@ import numpy as np
 from flask import Flask
 import os
 import json
-import razorpay
+
 import qrcode
 import io
 import base64
