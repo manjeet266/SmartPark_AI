@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+        --dark-bg: #0f172a;
+        --input-bg: #f8fafc;
+        --border-color: #e2e8f0;
+        --focus-ring: rgba(78, 115, 223, 0.25);
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #fff;
+        overflow-x: hidden;
+    }
+
+    /* Layout Wrapper */
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+    }
+
+    /* Left Side - Visuals */
+    .visual-side {
+        flex: 1;
+        background-color: var(--dark-bg);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 4rem;
+        color: white;
+    }
+
+    /* Animated Background for Visual Side */
+    .visual-side::before {
+        content: '';
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        top: -25%;
+        left: -25%;
+        background: radial-gradient(circle at 50% 50%, rgba(78, 115, 223, 0.15), transparent 60%);
+        animation: pulse 10s infinite ease-in-out;
+        z-index: 1;
+    }
+
+    .visual-content {
+        position: relative;
+        z-index: 2;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+
+        50% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+    }
+
+    .brand-badge {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 8px 16px;
+        border-radius: 30px;
+        display: inline-block;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: #60a5fa;
+    }
+
+    .visual-heading {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Feature Cards on Left */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 1.5rem;
+        border-radius: 16px;
+        backdrop-filter: blur(5px);
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .feature-card i {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #60a5fa;
+    }
+
+    /* Right Side - Form */
+    .form-side {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        background: white;
+        position: relative;
+    }
+
+    .form-wrapper {
+        width: 100%;
+        max-width: 550px;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Form Elements */
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-group-custom {
+        position: relative;
+    }
+
+    .form-control,
+    .form-select {
+        background-color: var(--input-bg);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        color: #1e293b;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: #fff;
+        border-color: #4e73df;
+        box-shadow: 0 0 0 4px var(--focus-ring);
+        outline: none;
+    }
+
+    /* Input Icons */
+    .input-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        cursor: pointer;
+        z-index: 5;
+    }
+
+    /* Submit Button */
+    .btn-register {
+        background: var(--primary-gradient);
+        color: white;
+        font-weight: 700;
+        padding: 1rem;
+        border-radius: 12px;
+        border: none;
+        width: 100%;
+        margin-top: 1.5rem;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px rgba(78, 115, 223, 0.2);
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(78, 115, 223, 0.3);
+    }
+
+    /* Error Messages */
+    .error-msg {
+        font-size: 0.75rem;
+        color: #ef4444;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .error-msg::before {
+        content: '\f06a';
+        /* FontAwesome warning */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 992px) {
+        .visual-side {
+            display: none;
+        }
+
+        .form-side {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="register-container">
+
+    <div class="visual-side">
+        <div class="visual-content">
+            <div class="brand-badge">
+                <i class="fas fa-sparkles me-2"></i>SMARTPARK AI V2.0
+            </div>
+            <h1 class="visual-heading">Parking made intelligent.</h1>
+            <p class="lead" style="color: #94a3b8; font-weight: 400;">
+                Join the largest AI-driven network. We use predictive algorithms to find you the perfect spot,
+                instantly.
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-satellite-dish"></i>
+                    <h6 class="fw-bold mb-1">Real-time Data</h6>
+                    <small class="text-white-50">Live updates every second</small>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-fingerprint"></i>
+                    <h6 class="fw-bold mb-1">Secure Access</h6>
+                    <small class="text-white-50">Biometric ready security</small>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h6 class="fw-bold mb-1">Instant Booking</h6>
+                    <small class="text-white-50">Zero latency reservation</small>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h6 class="fw-bold mb-1">AI Prediction</h6>
+                    <small class="text-white-50">Smart availability forecast</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-side">
+        <div class="form-wrapper">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 mb-4" role="alert"
+                style="border-radius: 12px;">
+                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="mb-4">
+                <h2 class="fw-bold mb-1 text-dark">Create Account</h2>
+                <p class="text-muted small">Enter your details to join the network.</p>
+            </div>
+
+            <form action="/register" method="POST" id="registerForm" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" id="fullName" class="form-control" placeholder="John Doe"
+                            required>
+                        <small id="nameError" class="error-msg d-none"></small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="uname" id="userName" class="form-control" placeholder="johndoe123"
+                            required>
+                        <small id="userError" class="error-msg d-none"></small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="john@example.com"
+                            required>
+                        <small id="emailError" class="error-msg d-none"></small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="text" name="mobile" id="mobile" class="form-control" placeholder="9876543210"
+                            maxlength="10" required>
+                        <small id="mobileError" class="error-msg d-none"></small>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Current City</label>
+                        <div class="input-group-custom">
+                            <input type="text" name="location" id="location" class="form-control"
+                                placeholder="e.g. New York" required>
+                            <i class="fas fa-map-marker-alt input-icon"></i>
+                        </div>
+                        <small id="locationError" class="error-msg d-none"></small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Password</label>
+                        <div class="input-group-custom">
+                            <input type="password" name="pass" id="reg_pass" class="form-control" placeholder="••••••••"
+                                required>
+                            <i class="fas fa-eye input-icon" id="reg_pass_icon"
+                                onclick="togglePassword('reg_pass')"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="confirm_pass" id="confirm_pass" class="form-control"
+                            placeholder="••••••••" required>
+                        <small id="passError" class="error-msg d-none"></small>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <label class="form-label d-block mb-2">I want to...</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="role" id="roleCustomer" value="customer"
+                                    checked>
+                                <label
+                                    class="btn btn-outline-light text-dark border w-100 py-3 text-start ps-3 shadow-sm"
+                                    for="roleCustomer">
+                                    <i class="fas fa-car text-primary me-2"></i> Find Parking
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="role" id="roleProvider" value="provider">
+                                <label
+                                    class="btn btn-outline-light text-dark border w-100 py-3 text-start ps-3 shadow-sm"
+                                    for="roleProvider">
+                                    <i class="fas fa-warehouse text-success me-2"></i> List a Spot
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-register">
+                    Create Account <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small">
+                        Already have an account?
+                        <a href="/" class="text-primary fw-bold text-decoration-none">Sign in here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle Password Visibility
+    function togglePassword(fieldId) {
+        const passwordInput = document.getElementById(fieldId);
+        const icon = document.getElementById(fieldId + '_icon');
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
+    // --- Validation Logic (Maintained from original) ---
+    const form = document.getElementById('registerForm');
+    const nameInput = document.getElementById('fullName');
+    const userInput = document.getElementById('userName');
+    const emailInput = document.getElementById('email');
+    const mobileInput = document.getElementById('mobile');
+    const locationInput = document.getElementById('location');
+    const passInput = document.getElementById('reg_pass');
+    const confirmPassInput = document.getElementById('confirm_pass');
+
+    const nameError = document.getElementById('nameError');
+    const userError = document.getElementById('userError');
+    const emailError = document.getElementById('emailError');
+    const mobileError = document.getElementById('mobileError');
+    const locationError = document.getElementById('locationError');
+    const passError = document.getElementById('passError');
+
+    function showError(element, message) {
+        element.innerText = " " + message;
+        element.classList.remove('d-none');
+        // Add visual error state to input
+        const inputField = element.previousElementSibling;
+        if (inputField) inputField.style.borderColor = "#ef4444";
+    }
+
+    function hideError(element) {
+        element.classList.add('d-none');
+        element.innerText = '';
+        // Remove visual error state
+        const inputField = element.previousElementSibling;
+        if (inputField) inputField.style.borderColor = "transparent";
+    }
+
+    function validateRequired(input, errorElement, fieldName) {
+        if (!input.value.trim()) {
+            showError(errorElement, fieldName + " is required");
+            return false;
+        } else {
+            hideError(errorElement);
+            return true;
+        }
+    }
+
+    function validateEmail() {
+        if (!validateRequired(emailInput, emailError, "Email")) return false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailInput.value)) {
+            showError(emailError, "Invalid Email Address");
+            return false;
+        } else {
+            hideError(emailError);
+            return true;
+        }
+    }
+
+    function validateMobile() {
+        if (!validateRequired(mobileInput, mobileError, "Phone")) return false;
+        const mobileRegex = /^\d{10}$/;
+        if (!mobileRegex.test(mobileInput.value)) {
+            showError(mobileError, "Phone must be 10 digits");
+            return false;
+        } else {
+            hideError(mobileError);
+            return true;
+        }
+    }
+
+    function validatePasswords() {
+        if (!validateRequired(passInput, passError, "Password")) return false;
+        if (passInput.value !== confirmPassInput.value) {
+            showError(passError, "Passwords do not match");
+            return false;
+        } else {
+            hideError(passError);
+            return true;
+        }
+    }
+
+    // Real-time validation
+    nameInput.addEventListener('input', () => validateRequired(nameInput, nameError, "Full Name"));
+    userInput.addEventListener('input', () => validateRequired(userInput, userError, "Username"));
+    locationInput.addEventListener('input', () => validateRequired(locationInput, locationError, "Location"));
+    emailInput.addEventListener('input', validateEmail);
+    mobileInput.addEventListener('input', validateMobile);
+    confirmPassInput.addEventListener('input', validatePasswords);
+    passInput.addEventListener('input', () => {
+        if (confirmPassInput.value) validatePasswords();
+    });
+
+    form.addEventListener('submit', function (event) {
+        const isNameValid = validateRequired(nameInput, nameError, "Full Name");
+        const isUserValid = validateRequired(userInput, userError, "Username");
+        const isLocationValid = validateRequired(locationInput, locationError, "Location");
+        const isEmailValid = validateEmail();
+        const isMobileValid = validateMobile();
+        const isPassValid = validatePasswords();
+
+        if (!isNameValid || !isUserValid || !isLocationValid || !isEmailValid || !isMobileValid || !isPassValid) {
+            event.preventDefault();
+        }
+    });
+</script>
+
+`11
+{% endblock %}

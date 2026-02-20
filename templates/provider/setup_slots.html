@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --accent: #4e73df;
+        --dark-panel: #1a1c23;
+        --bg-editor: #111;
+    }
+
+    /* Change overflow-y to hidden to prevent body scroll, 
+       but ensure the sidebar can breathe */
+    body {
+        background-color: var(--bg-editor);
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    /* Split Layout - Adjusted height to use calc(100vh - 56px) 
+       assuming standard Bootstrap navbar height */
+    .editor-wrapper {
+        display: flex;
+        height: calc(80vh - 56px);
+        width: 90vw;
+        overflow: hidden;
+    }
+
+    /* Left Sidebar - Added overflow-y: auto to ensure 
+       buttons aren't cut off on small screens */
+    .tools-sidebar {
+        width: 280px;
+        min-width: 280px;
+        background: var(--dark-panel);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+    }
+
+    /* Right Canvas Area */
+    .canvas-wrapper {
+        flex-grow: 1;
+        background: repeating-conic-gradient(#1a1a1a 0% 25%, #0d0d0d 0% 50%) 50% / 20px 20px;
+        overflow: auto;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+    }
+
+    .tool-header {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+        display: block;
+    }
+
+    /* Tool Buttons */
+    .btn-tool {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        text-align: left;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        transition: 0.2s;
+        border-radius: 8px;
+        margin-bottom: 0.4rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .btn-check:checked+.btn-tool {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.3);
+    }
+
+    .btn-tool i {
+        width: 20px;
+        text-align: center;
+        margin-right: 8px;
+    }
+
+    /* Zoom Controls */
+    .zoom-controls {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 4px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-zoom {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        font-weight: bold;
+        padding: 5px;
+        transition: 0.2s;
+        border-radius: 5px;
+    }
+
+    .btn-zoom:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Canvas */
+    .canvas-container {
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    canvas {
+        display: block;
+        cursor: crosshair;
+    }
+
+    .status-badge {
+        background: rgba(255, 255, 255, 0.1);
+        color: #aaa;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.65rem;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Ensure buttons at the bottom have space */
+    .action-group {
+        margin-top: auto;
+        padding-top: 1.5rem;
+    }
+
+    .btn-tool-danger:hover {
+        background: rgba(220, 53, 69, 0.2);
+        border-color: #dc3545;
+    }
+</style>
+
+<div class="editor-wrapper">
+    <div class="tools-sidebar">
+        <div class="mb-3">
+            <h5 class="text-white fw-bold mb-1"><i class="fas fa-satellite-dish me-2 text-primary"></i>AI Mapper</h5>
+            <p class="text-white-50 x-small mb-0">{{ lot.name }}</p>
+        </div>
+
+        <div class="status-badge">
+            MODE: <span id="modeDisplay" class="text-white fw-bold">RECTANGLE</span>
+        </div>
+
+        <span class="tool-header">Zoom Level</span>
+        <div class="zoom-controls">
+            <button class="btn-zoom" onclick="zoomOut()"><i class="fas fa-minus"></i></button>
+            <span class="text-white small d-flex align-items-center" id="zoomLevel">100%</span>
+            <button class="btn-zoom" onclick="zoomIn()"><i class="fas fa-plus"></i></button>
+        </div>
+
+        <span class="tool-header">Drawing Tools</span>
+        <div class="w-100">
+            <input type="radio" class="btn-check" name="drawMode" id="modeRect" checked>
+            <label class="btn btn-tool" for="modeRect"><i class="fas fa-vector-square"></i> Rectangle</label>
+
+            <input type="radio" class="btn-check" name="drawMode" id="modePoly">
+            <label class="btn btn-tool" for="modePoly"><i class="fas fa-draw-polygon"></i> Polygon</label>
+
+            <input type="radio" class="btn-check" name="drawMode" id="modeDelete">
+            <label class="btn btn-tool btn-tool-danger" for="modeDelete"><i class="fas fa-trash-alt text-danger"></i>
+                Remove Space</label>
+        </div>
+
+        <div class="action-group">
+            <button onclick="undo()" class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                <i class="fas fa-undo me-2"></i> Undo Last
+            </button>
+            <button onclick="saveSlots({{ lot.id }})" class="btn btn-success btn-sm w-100 py-2 fw-bold">
+                <i class="fas fa-save me-2"></i> Save Slots
+            </button>
+        </div>
+    </div>
+
+    <div class="canvas-wrapper">
+        <div class="canvas-container" id="canvasContainer" style="position: relative;">
+            <img id="refImage" src="{{ url_for('video_feed', lot_id=lot.id) }}"
+                style="display: block; max-width: none;">
+            <canvas id="slotCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modeDisplay = document.getElementById('modeDisplay');
+    document.getElementById('modeRect').addEventListener('change', () => modeDisplay.innerText = "RECTANGLE");
+    document.getElementById('modePoly').addEventListener('change', () => modeDisplay.innerText = "POLYGON");
+    document.getElementById('modeDelete').addEventListener('change', () => modeDisplay.innerText = "DELETE MODE");
+
+    // Inject saved slots from backend to a global variable
+    // MUST be defined before canvas_editor.js loads
+    window.importedSlots = [
+        {% for slot in lot.slots %}
+    { { slot.points | safe } },
+    {% endfor %}
+    ];
+</script>
+
+<script src="{{ url_for('static', filename='js/canvas_editor.js') }}?v={{ range(1, 10000) | random }}"></script>
+
+{% endblock %}

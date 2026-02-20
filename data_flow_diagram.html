@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SmartPark Data Flow Diagram</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .mermaid {
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</head>
+
+<body>
+    <h1>SmartPark Project - Data Flow Diagrams</h1>
+
+    <h2>Level 0: Context Diagram</h2>
+    <p>High-level view of the system and its interaction with external entities.</p>
+    <div class="mermaid">
+        graph TD
+        Customer[Customer] -->|Login, Search, Book, Pay| System(SmartPark System)
+        Provider[Provider] -->|Login, Manage Lots, Gate Control| System
+        Admin[Admin] -->|Verify Users, View Reports| System
+        Camera[Camera Feed] -->|Video Stream| System
+
+        System -->|Booking Confirmation, Alerts| Customer
+        System -->|Dashboard, Reports| Provider
+        System -->|Global Stats| Admin
+    </div>
+
+    <h2>Level 1: Detailed Data Flow</h2>
+    <p>Breakdown of major system processes and data stores.</p>
+    <div class="mermaid">
+        flowchart TD
+        %% External Entities
+        User((User: Customer/Provider/Admin))
+        Camera((Camera Source))
+        PG((Payment Gateway))
+
+        %% Processes
+        subgraph System Boundary
+        Auth[1.0 Authentication & User Mgmt]
+        LotMgmt[2.0 Parking Lot Management]
+        BookingProc[3.0 Booking & Payment]
+        Detection[4.0 Slot Detection Engine]
+        Gate[5.0 Smart Gate Logic]
+        Notify[6.0 Notification Service]
+        end
+
+        %% Data Stores
+        DB_User[(User Database)]
+        DB_Lot[(Parking Lots & Slots DB)]
+        DB_Book[(Booking Records)]
+        DB_Review[(Reviews DB)]
+
+        %% Flows for Auth
+        User -->|Register/Login Creds| Auth
+        Auth <-->|Validate/Store| DB_User
+
+            %% Flows for Lot Management (Provider)
+            User -->|Create Lot/Setup Slots| LotMgmt
+            LotMgmt -->|Save Lot Info| DB_Lot
+
+            %% Flows for Detection
+            Camera -->|Video Frames| Detection
+            Detection -->|Update Available/Red| Pool[(In-Memory Status)]
+            Pool -.->|Live Status API| BookingProc
+
+            %% Flows for Booking (Customer)
+            User -->|Search & View Live| BookingProc
+            BookingProc -->|Reading Lot Info| DB_Lot
+            BookingProc -->|Check Availability| DB_Book
+            User -->|Initiate Payment| BookingProc
+            BookingProc <-->|Process Transaction| PG
+                BookingProc -->|Create Booking| DB_Book
+                BookingProc -->|Trigger Confirmation| Notify
+                Notify -->|Send SMS/WhatsApp| User
+
+                %% Flows for Gate (Provider)
+                User -->|Scan QR Ticket| Gate
+                Gate <-->|Validate Ticket/Check Times| DB_Book
+                    Gate -->|Update Check-in/Out| DB_Book
+
+                    %% Flows for Reviews
+                    User -->|Submit Review| BookingProc
+                    BookingProc -->|Save Review| DB_Review
+    </div>
+
+    <hr>
+
+    <h2>Process Descriptions</h2>
+    <ul>
+        <li><strong>1.0 Authentication & User Mgmt:</strong> Handles registration for Customers and Providers. Providers
+            require Admin verification before their lots are visible. Stores credentials securely in the User Database.
+        </li>
+        <li><strong>2.0 Parking Lot Management:</strong> Allows Providers to create parking lots, upload reference
+            images/videos, and visually define parking slots on the map/image.</li>
+        <li><strong>3.0 Booking & Payment:</strong> The core customer flow. Customers view live slot status (red/green)
+            overlaid on the parking lot image. They select a slot, duration, and pay via Razorpay. A secure Booking
+            Record is created.</li>
+        <li><strong>4.0 Slot Detection Engine:</strong> A background process (using Computer Vision) that analyzes the
+            video feed from cameras. It determines if a slot is occupied or empty and updates the Live Status.</li>
+        <li><strong>5.0 Smart Gate Logic:</strong> Handles entry and exit. Scans the Booking QR code, checks validity
+            (time, location), logs entry/exit times, and calculates any overstay fees.</li>
+        <li><strong>6.0 Notification Service:</strong> Sends booking confirmations and "Time Expiring" alerts to
+            customers via Twilio/WhatsApp API.</li>
+    </ul>
+
+    <h3>Data Stores</h3>
+    <ul>
+        <li><strong>User Database:</strong> profiles, authentication info, roles.</li>
+        <li><strong>Parking Lots & Slots DB:</strong> lot details, geo-location, slot coordinates (JSON), rates.</li>
+        <li><strong>Booking Records:</strong> booking IDs, ticket UUIDs, user linkage, timestamps, payment status.</li>
+    </ul>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+venv/
+venv_new/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.db
+smartpark.db
+instance/
+.pytest_cache/
+.vscode/
+.idea/
+.env
+.DS_Store

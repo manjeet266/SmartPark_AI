@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Live Location Selector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background: #38bdf8;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+        }
+
+        #map {
+            height: 350px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .info {
+            margin-top: 15px;
+            background: #020617;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .label {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📍 Select Live Location</h1>
+    <p>Use live location OR click on the map to choose manually</p>
+
+    <button onclick="getLocation()">Get My Live Location</button>
+
+    <div id="map"></div>
+
+    <div class="info">
+        <p><span class="label">Latitude:</span> <span id="lat">---</span></p>
+        <p><span class="label">Longitude:</span> <span id="lon">---</span></p>
+        <p><span class="label">Address:</span></p>
+        <p id="address">---</p>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        let map, marker;
+
+        function getLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                successLocation,
+                () => alert("Unable to retrieve your location"),
+                { enableHighAccuracy: true }
+            );
+        }
+
+        function successLocation(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            updateUI(lat, lon);
+            initMap(lat, lon);
+        }
+
+        function initMap(lat, lon) {
+            if (!map) {
+                map = L.map("map").setView([lat, lon], 16);
+
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "© OpenStreetMap contributors",
+                }).addTo(map);
+
+                marker = L.marker([lat, lon]).addTo(map);
+
+                // ✅ CLICK TO SELECT LOCATION
+                map.on("click", function (e) {
+                    const clickedLat = e.latlng.lat;
+                    const clickedLon = e.latlng.lng;
+
+                    updateUI(clickedLat, clickedLon);
+                    marker.setLatLng([clickedLat, clickedLon]);
+                    map.setView([clickedLat, clickedLon], 16);
+                });
+            } else {
+                map.setView([lat, lon], 16);
+                marker.setLatLng([lat, lon]);
+            }
+        }
+
+        function updateUI(lat, lon) {
+            document.getElementById("lat").innerText = lat.toFixed(6);
+            document.getElementById("lon").innerText = lon.toFixed(6);
+            getAddress(lat, lon);
+        }
+
+        function getAddress(lat, lon) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    const addr = data.address || {};
+
+                    const house = addr.house_number || "";
+                    const road = addr.road || "";
+                    const area = addr.suburb || addr.village || "";
+                    const city = addr.city || addr.town || addr.county || "";
+                    const district = addr.state_district || "";
+                    const state = addr.state || "";
+                    const country = addr.country || "";
+                    const pincode = addr.postcode || "";
+
+                    document.getElementById("address").innerHTML = `
+                        <strong>House / Road:</strong> ${house} ${road}<br>
+                        <strong>Area:</strong> ${area}<br>
+                        <strong>City:</strong> ${city}<br>
+                        <strong>District:</strong> ${district}<br>
+                        <strong>State:</strong> ${state}<br>
+                        <strong>Country:</strong> ${country}<br>
+                        <strong>Pincode:</strong> ${pincode}
+                    `;
+                })
+                .catch(() => {
+                    document.getElementById("address").innerText = "Unable to fetch address";
+                });
+        }
+    </script>
+
+</body>
+
+</html>

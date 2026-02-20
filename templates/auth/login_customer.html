@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --brand-primary: #4e73df;
+        --brand-dark: #1a1c23;
+        --soft-bg: #f4f7f6;
+    }
+
+    /* Centers the card perfectly on the page */
+    .login-wrapper {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--soft-bg);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        /* Slimmer profile */
+        background: white;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .card-header-visual {
+        background: var(--brand-dark);
+        color: white;
+        padding: 1.5rem 1rem;
+        /* Reduced padding */
+        text-align: center;
+    }
+
+    .brand-icon {
+        width: 40px;
+        /* Scaled down */
+        height: 40px;
+        background: var(--brand-primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+        font-size: 1rem;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #4a5568;
+        font-size: 0.7rem;
+        /* Compact font size */
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 0.35rem;
+        /* Tighter spacing */
+    }
+
+    .form-control {
+        border: 1.5px solid #edf2f7;
+        padding: 0.65rem 0.9rem;
+        /* Slimmer inputs */
+        border-radius: 8px;
+        background-color: #f8fafc;
+        font-size: 0.9rem;
+    }
+
+    .input-group-text {
+        background-color: #f8fafc;
+        border: 1.5px solid #edf2f7;
+        color: #a0aec0;
+        padding: 0 0.75rem;
+    }
+
+    .btn-login {
+        background: var(--brand-dark);
+        color: white;
+        border: none;
+        padding: 0.8rem;
+        /* Compact button height */
+        border-radius: 8px;
+        font-weight: 700;
+        width: 100%;
+        margin-top: 0.5rem;
+        transition: 0.3s;
+    }
+
+    .btn-login:hover {
+        background: #000;
+        transform: translateY(-2px);
+    }
+
+    /* Body padding reduction */
+    .card-body {
+        padding: 1.5rem 2rem !important;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="card-header-visual">
+            <div class="brand-icon">
+                <i class="fas fa-parking text-white"></i>
+            </div>
+            <h4 class="fw-bold mb-1">Welcome Back</h4>
+            <span class="badge rounded-pill bg-secondary bg-opacity-25 small px-2 py-1" style="font-size: 0.7rem;">
+                <i class="fas fa-user-circle me-1"></i> Customer Portal
+            </span>
+        </div>
+
+        <div class="card-body">
+            <form action="/login/customer" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" id="login_pass" class="form-control"
+                            placeholder="••••••••" required>
+                        <span class="input-group-text" onclick="togglePassword('login_pass')" style="cursor:pointer">
+                            <i class="fas fa-eye" id="login_pass_icon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="rem">
+                        <label class="form-check-label small text-muted" for="rem" style="font-size: 0.75rem;">Remember
+                            me</label>
+                    </div>
+                    <a href="#" class="small text-primary text-decoration-none fw-bold"
+                        style="font-size: 0.75rem;">Forgot?</a>
+                </div>
+
+                <button type="submit" class="btn btn-login">
+                    Start Booking <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+
+                <div class="text-center mt-3">
+                    <p class="small text-muted mb-0" style="font-size: 0.75rem;">New here?
+                        <a href="/register" class="text-primary fw-bold text-decoration-none">Create Account</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        const icon = document.getElementById(id + '_icon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+</script>
+
+{% endblock %}

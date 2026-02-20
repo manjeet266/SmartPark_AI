@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-dark text-white p-4">
+                    <h2 class="mb-0 fw-bold"><i class="fas fa-file-contract me-2"></i> Terms and Conditions</h2>
+                    <p class="mb-0 opacity-75">Last Updated: January 2026</p>
+                </div>
+                <div class="card-body p-5">
+
+                    <h4 class="fw-bold text-primary mb-3">1. Introduction</h4>
+                    <p>Welcome to SmartPark. By listing your parking facility on our platform, you agree to comply with
+                        and be bound by the following terms and conditions. Please read them carefully.</p>
+
+                    <hr class="my-4">
+
+                    <h4 class="fw-bold text-primary mb-3">2. Vendor Obligations & Legality</h4>
+                    <ul>
+                        <li class="mb-2"><strong>Legal Ownership:</strong> You represent and warrant that you are the
+                            legal owner or authorized administrator of the parking facility you are listing.</li>
+                        <li class="mb-2"><strong>Compliance with Laws:</strong> You agree to comply with all local,
+                            state, and national laws regarding property usage, zoning, and business operations.</li>
+                        <li class="mb-2"><strong>Accuracy of Information:</strong> All information provided about the
+                            facility (location, rates, amenities, CCTV availability) must be accurate and kept
+                            up-to-date.</li>
+                    </ul>
+
+                    <h4 class="fw-bold text-primary mb-3 mt-4">3. Liability & Indemnity</h4>
+                    <p>SmartPark operates solely as a technology platform connecting providers with customers.</p>
+                    <ul>
+                        <li class="mb-2"><strong>No Liability for Vehicles:</strong> SmartPark is not responsible for
+                            theft of, damage to, or accidents involving vehicles parked at your facility.</li>
+                        <li class="mb-2"><strong>Indemnification:</strong> You agree to indemnify and hold SmartPark
+                            harmless from any claims, damages, liabilities, costs, or expenses arising from the
+                            operation of your parking facility.</li>
+                    </ul>
+
+                    <h4 class="fw-bold text-primary mb-3 mt-4">4. Payment & Fees</h4>
+                    <ul>
+                        <li class="mb-2"><strong>Platform Connectivity:</strong> We facilitate bookings but the actual
+                            parking contract is between you (the Provider) and the Customer.</li>
+                        <li class="mb-2"><strong>UPI & Financials:</strong> You are responsible for maintaining a valid
+                            UPI ID to receive payments directly. SmartPark is not liable for failed transactions due to
+                            incorrect banking details provided by you.</li>
+                    </ul>
+
+                    <h4 class="fw-bold text-primary mb-3 mt-4">5. Safety & Security Requirements</h4>
+                    <p>To ensure a safe environment for our users, you agree to:</p>
+                    <ul>
+                        <li class="mb-2">Maintain adequate lighting and general safety in the facility.</li>
+                        <li class="mb-2">Ensure that the CCTV cameras (if listed as an amenity) are functional and
+                            active.</li>
+                        <li class="mb-2">Clearly mark parking slots to avoid confusion (using our AI Mapping Tool).</li>
+                    </ul>
+
+                    <h4 class="fw-bold text-primary mb-3 mt-4">6. Termination</h4>
+                    <p>SmartPark reserves the right to suspend or terminate your account and delist your facility
+                        immediately if:</p>
+                    <ul>
+                        <li>We receive credible complaints regarding safety or fraud.</li>
+                        <li>You are found to be in violation of local laws.</li>
+                        <li>You breach any of these Terms and Conditions.</li>
+                    </ul>
+
+                    <div class="mt-5 text-center">
+                        <button onclick="window.close()" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold">
+                            <i class="fas fa-times me-2"></i> Close Tab
+                        </button>
+                        <p class="mt-2 small text-muted">(This page opened in a new tab)</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

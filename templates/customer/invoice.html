@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ booking.id }}</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            text-align: center;
+            color: #777;
+        }
+
+        body h1 {
+            font-weight: 300;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+            color: #000;
+        }
+
+        body h3 {
+            font-weight: 300;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #555;
+        }
+
+        body a {
+            color: #06f;
+        }
+
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+            font-size: 16px;
+            line-height: 24px;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: #555;
+            text-align: left;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+        }
+
+        .invoice-box table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .invoice-box table tr td:nth-child(2) {
+            text-align: right;
+        }
+
+        .invoice-box table tr.top table td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.top table td.title {
+            font-size: 45px;
+            line-height: 45px;
+            color: #333;
+        }
+
+        .invoice-box table tr.information table td {
+            padding-bottom: 40px;
+        }
+
+        .invoice-box table tr.heading td {
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        .invoice-box table tr.details td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-box table tr.item.last td {
+            border-bottom: none;
+        }
+
+        .invoice-box table tr.total td:nth-child(2) {
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .invoice-box table tr.top table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+
+            .invoice-box table tr.information table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+        }
+
+        .print-btn {
+            background: #333;
+            color: #fff;
+            border: 0;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-box">
+        <table cellpadding="0" cellspacing="0">
+            <tr class="top">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td class="title">
+                                <span style="color:#4e73df; font-weight:bold;">Smart</span>Park
+                            </td>
+
+                            <td>
+                                <strong>INVOICE</strong><br>
+                                #: {{ booking.id }}<br>
+                                Date: {{ booking.start_time.strftime('%b %d, %Y') }}<br>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="information">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td>
+                                <strong>Provider:</strong><br>
+                                {% if provider %}
+                                {{ provider.name }}<br>
+                                {{ provider.location }}
+                                {% else %}
+                                Unknown Provider
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <strong>Bill To:</strong><br>
+                                {{ booking.customer_name }}<br>
+                                {{ booking.vehicle_number }}<br>
+                                {{ user.email if user else '' }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="heading">
+                <td>
+                    Payment Method
+                </td>
+
+                <td>
+                    Check #
+                </td>
+            </tr>
+
+            <tr class="details">
+                <td>
+                    {{ booking.payment_method }}
+                </td>
+
+                <td>
+                    {{ booking.payment_status }}
+                </td>
+            </tr>
+
+            <tr class="heading">
+                <td>
+                    Item
+                </td>
+
+                <td>
+                    Price
+                </td>
+            </tr>
+
+            <tr class="item">
+                <td>
+                    {% if booking.slot %}
+                    Parking at {{ booking.slot.parking_lot.name }} (Slot: {{ booking.slot.slot_label }})<br>
+                    {% else %}
+                    Parking data not available (Slot Deleted)<br>
+                    {% endif %}
+                    <small>{{ booking.start_time.strftime('%I:%M %p') }} - {{ booking.end_time.strftime('%I:%M %p')
+                        }}</small>
+                </td>
+
+                <td>
+                    ₹{{ "%.2f"|format(booking.amount) }}
+                </td>
+            </tr>
+
+            <tr class="total">
+                <td></td>
+
+                <td>
+                    Total: ₹{{ "%.2f"|format(booking.amount) }}
+                </td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+            <p style="font-weight: bold; margin-bottom: 10px;">Booking QR Code</p>
+            <div id="qrcode" style="display: inline-block; padding: 10px; border: 1px solid #eee;"></div>
+            <p style="font-size: 12px; color: #999; margin-top: 5px;">Scan at entry gate</p>
+        </div>
+
+        <div class="button-container" style="text-align: center;" data-html2canvas-ignore="true">
+            <button onclick="window.print()" class="print-btn">Print Invoice</button>
+            <button onclick="downloadPDF()" class="print-btn" style="background:#4e73df; margin-left: 10px;">Download
+                PDF</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Generate QR Code internally to ensure it renders correctly in PDF
+        new QRCode(document.getElementById("qrcode"), {
+            text: "booking_id:{{ booking.id }}",
+            width: 128,
+            height: 128,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        function downloadPDF() {
+            // Allow time for QR code and other elements to fully render
+            setTimeout(() => {
+                const element = document.querySelector('.invoice-box');
+                // Clone the element to manipulate it for PDF generation without affecting view
+                const clone = element.cloneNode(true);
+
+                // Remove the buttons from the clone to avoid them appearing in PDF
+                const buttons = clone.querySelector('.button-container');
+                if (buttons) buttons.remove();
+
+                const opt = {
+                    margin: [0.5, 0.5],
+                    filename: 'SmartPark_Invoice_{{ booking.id }}.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, logging: true }, // Added logging for debug
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                // Use the clone for PDF generation
+                html2pdf().set(opt).from(clone).save();
+            }, 500); // 500ms delay
+        }
+    </script>
+</body>
+
+
+</html>

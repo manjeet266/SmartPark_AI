@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --admin-accent: #e74a3b;
+        --brand-dark: #1a1c23;
+        --soft-bg: #f4f7f6;
+    }
+
+    .login-wrapper {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--soft-bg);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        background: white;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header-visual {
+        background: var(--brand-dark);
+        color: white;
+        padding: 1.25rem 1rem;
+        /* Tightened padding */
+        text-align: center;
+        border-bottom: 3px solid var(--admin-accent);
+    }
+
+    .brand-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--admin-accent);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        /* Reduced bottom margin */
+        font-size: 1rem;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #4a5568;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 0.25rem;
+        /* Minimal margin */
+    }
+
+    .form-control {
+        border: 1.5px solid #edf2f7;
+        padding: 0.6rem 0.9rem;
+        /* Slimmer inputs */
+        border-radius: 8px;
+        background-color: #f8fafc;
+        font-size: 0.9rem;
+    }
+
+    .input-group-text {
+        background-color: #f8fafc;
+        border: 1.5px solid #edf2f7;
+        color: #a0aec0;
+        padding: 0 0.75rem;
+    }
+
+    .btn-admin {
+        background: var(--admin-accent);
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        /* Compact button */
+        border-radius: 8px;
+        font-weight: 700;
+        width: 100%;
+        margin-top: 0.5rem;
+        transition: 0.3s;
+    }
+
+    .btn-admin:hover {
+        background: #be2617;
+    }
+
+    /* Body padding reduction */
+    .card-body {
+        padding: 1.25rem 1.75rem !important;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="card-header-visual">
+            <div class="brand-icon">
+                <i class="fas fa-user-shield text-white"></i>
+            </div>
+            <h4 class="fw-bold mb-1">System Admin</h4>
+            <span class="badge rounded-pill bg-danger bg-opacity-25 text-danger small px-2 py-1"
+                style="font-size: 0.7rem;">
+                <i class="fas fa-lock me-1"></i> Restricted Access
+            </span>
+        </div>
+
+        <div class="card-body">
+            <form action="/login/admin" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Admin Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-terminal"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Root username"
+                            value="admin" required>
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        <input type="password" name="password" id="admin_pass" class="form-control"
+                            placeholder="••••••••" value="admin123" required>
+                        <span class="input-group-text" onclick="togglePassword('admin_pass')" style="cursor:pointer">
+                            <i class="fas fa-eye" id="admin_pass_icon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="text-end mb-3">
+                    <a href="#" class="text-muted" style="font-size: 0.7rem; text-decoration: none;">Reset via Master
+                        Key?</a>
+                </div>
+
+                <button type="submit" class="btn btn-admin">
+                    Access Control Panel <i class="fas fa-shield-alt ms-1"></i>
+                </button>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted mb-0" style="font-size: 0.7rem;">Authorized personnel only. Activities are
+                        logged.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(id) {
+        const input = document.getElementById(id);
+        const icon = document.getElementById(id + '_icon');
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+</script>
+
+{% endblock %}

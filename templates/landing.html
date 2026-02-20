@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPark AI | Select Portal</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon.jpg') }}">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+            --dark-color: #1a1c23;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            overflow-x: hidden;
+            /* Animated Gradient Background */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+        }
+
+        /* Abstract shapes in background */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: #4e73df;
+            top: -50px;
+            left: -50px;
+        }
+
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            background: #1cc88a;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(30px, 50px);
+            }
+        }
+
+        /* Main Container */
+        .main-content {
+            z-index: 1;
+            width: 100%;
+        }
+
+        /* Typography */
+        .brand-text {
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--dark-color);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Card Styling - Glassmorphism */
+        .role-card {
+            border: 1px solid white;
+            border-radius: 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none !important;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hover Effects */
+        .role-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: #fff;
+        }
+
+        /* Role Specific Hovers */
+        .card-admin:hover {
+            box-shadow: 0 20px 40px rgba(231, 74, 59, 0.2);
+            border-color: #ffcccc;
+        }
+
+        .card-provider:hover {
+            box-shadow: 0 20px 40px rgba(78, 115, 223, 0.2);
+            border-color: #ccd9ff;
+        }
+
+        .card-customer:hover {
+            box-shadow: 0 20px 40px rgba(28, 200, 138, 0.2);
+            border-color: #ccffdd;
+        }
+
+        /* Icons */
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .icon-box::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            opacity: 0.3;
+            transform: scale(0.8);
+            transition: 0.4s;
+            z-index: -1;
+        }
+
+        .role-card:hover .icon-box::after {
+            transform: scale(1.2);
+            opacity: 0.5;
+            filter: blur(10px);
+        }
+
+        /* Role Colors */
+        .admin-style .icon-box {
+            background: rgba(231, 74, 59, 0.1);
+            color: var(--danger-color);
+        }
+
+        .admin-style .icon-box::after {
+            background: var(--danger-color);
+        }
+
+        .admin-style .btn-custom {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .provider-style .icon-box {
+            background: rgba(78, 115, 223, 0.1);
+            color: var(--primary-color);
+        }
+
+        .provider-style .icon-box::after {
+            background: var(--primary-color);
+        }
+
+        .provider-style .btn-custom {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .customer-style .icon-box {
+            background: rgba(28, 200, 138, 0.1);
+            color: var(--success-color);
+        }
+
+        .customer-style .icon-box::after {
+            background: var(--success-color);
+        }
+
+        .customer-style .btn-custom {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* Buttons */
+        .btn-custom {
+            border-radius: 12px;
+            font-weight: 700;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            opacity: 0.9;
+        }
+
+        .role-card:hover .btn-custom {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* Animations */
+        .animate-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .badge-pill {
+            background: #fff;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div class="container main-content">
+
+        <div class="text-center mb-5 animate-up">
+            <div class="badge-pill mb-3">
+                <i class="fas fa-sparkles me-2"></i>Welcome to the Future of Parking
+            </div>
+            <h1 class="brand-text display-4 mb-2">SmartPark <span class="text-gradient">AI</span></h1>
+            <p class="text-secondary" style="font-size: 1.1rem;">Select your role to access the intelligent dashboard
+            </p>
+        </div>
+
+        <div class="row justify-content-center g-4">
+
+            <div class="col-md-4 col-lg-3 animate-up delay-1">
+                <a href="/login/admin" class="card role-card card-admin admin-style p-4">
+                    <div class="card-body text-center d-flex flex-column h-100">
+                        <div class="icon-box">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">System Admin</h4>
+                        <p class="text-secondary small mb-4">Master controls, user management & system configuration.
+                        </p>
+                        <div class="mt-auto">
+                            <button class="btn btn-custom shadow-sm">Secure Login <i
+                                    class="fas fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3 animate-up delay-2">
+                <a href="/login/provider" class="card role-card card-provider provider-style p-4">
+                    <div class="card-body text-center d-flex flex-column h-100">
+                        <div class="icon-box">
+                            <i class="fas fa-building-circle-check"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Parking Provider</h4>
+                        <p class="text-secondary small mb-4">Manage lots, view AI analytics & track earnings.</p>
+                        <div class="mt-auto">
+                            <button class="btn btn-custom shadow-sm">Manage Lots <i
+                                    class="fas fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4 col-lg-3 animate-up delay-3">
+                <a href="/login/customer" class="card role-card card-customer customer-style p-4">
+                    <div class="card-body text-center d-flex flex-column h-100">
+                        <div class="icon-box">
+                            <i class="fas fa-car-on"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Customer</h4>
+                        <p class="text-secondary small mb-4">Find spots real-time, navigate & book instantly.</p>
+                        <div class="mt-auto">
+                            <button class="btn btn-custom shadow-sm">Find Parking <i
+                                    class="fas fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-5 animate-up delay-3">
+            <p class="text-muted small">
+                Don't have an account?
+                <a href="/register"
+                    class="text-decoration-none fw-bold text-dark border-bottom border-dark pb-1 ms-1">Register Now</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

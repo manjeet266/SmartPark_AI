@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Entry/Exit Log - {{ lot.name }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #fff;
+            color: #000;
+            padding: 40px;
+            font-family: 'Courier New', Courier, monospace;
+            /* Monospace for log feel */
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        .log-table th {
+            border-bottom: 2px solid #000;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .log-table td {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 5px;
+        }
+
+        .status-in {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-out {
+            color: red;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: orange;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print mb-4 text-center">
+        <button onclick="window.print()" class="btn btn-primary btn-lg shadow">
+            <i class="fas fa-file-pdf"></i> Save as PDF / Print
+        </button>
+        <button onclick="window.close()" class="btn btn-secondary btn-lg ms-2">Close</button>
+    </div>
+
+    <div class="header">
+        <h1>PARKING ENTRY/EXIT LOG</h1>
+        <h3>{{ lot.name }}</h3>
+        <p>Generated on: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+
+    <table class="table table-borderless log-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Vehicle No</th>
+                <th>Customer</th>
+                <th>Slot</th>
+                <th>Entry Time (Check-In)</th>
+                <th>Exit Time (Check-Out)</th>
+                <th>Duration</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td class="fw-bold">{{ b.vehicle_number }}</td>
+                <td>{{ b.customer_name }}</td>
+                <td>{{ b.slot.slot_label }}</td>
+                <td>
+                    {% if b.check_in_time %}
+                    {{ b.check_in_time.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if b.check_out_time %}
+                    {{ b.check_out_time.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if b.check_in_time and b.check_out_time %}
+                    {% set duration = b.check_out_time - b.check_in_time %}
+                    {{ (duration.total_seconds() / 60)|int }} mins
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if b.check_out_time %}
+                    <span class="status-out">EXITED</span>
+                    {% elif b.check_in_time %}
+                    <span class="status-in">INSIDE</span>
+                    {% else %}
+                    <span class="status-pending">PENDING</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-5 text-center text-muted small">
+        <p>-- End of Report --</p>
+        <p>SmartPark AI Solution</p>
+    </div>
+
+    <script>
+        // Auto-print option if requested specifically
+        // window.print();
+    </script>
+</body>
+
+</html>

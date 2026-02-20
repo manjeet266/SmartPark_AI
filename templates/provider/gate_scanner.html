@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Load HTML5-QRCode Library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+    /* Modern Scanner UI */
+    .scanner-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding-top: 2rem;
+    }
+
+    .scanner-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+    }
+
+    #reader {
+        width: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        background: #000;
+    }
+
+    /* Remove default ugly borders from library */
+    #reader__scan_region {
+        background: #000;
+    }
+
+    .status-panel {
+        padding: 2rem;
+        text-align: center;
+        background: #f8fafc;
+        border-top: 1px solid #eee;
+    }
+
+    /* BOOM BARRIER ANIMATION */
+    .gate-wrapper {
+        position: relative;
+        width: 200px;
+        height: 150px;
+        margin: 0 auto 20px;
+        perspective: 1000px;
+    }
+
+    .post {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 30px;
+        height: 80px;
+        background: #333;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .barrier {
+        position: absolute;
+        bottom: 60px;
+        /* Pivot point height */
+        left: 20px;
+        width: 180px;
+        height: 15px;
+        background: repeating-linear-gradient(45deg,
+                #e74c3c,
+                #e74c3c 20px,
+                #fff 20px,
+                #fff 40px);
+        transform-origin: 0% 50%;
+        transform: rotate(0deg);
+        /* Start Closed */
+        transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 5px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+
+    .barrier.open {
+        transform: rotate(-90deg);
+        /* Lift UP */
+    }
+
+    .traffic-light {
+        width: 20px;
+        height: 40px;
+        background: #333;
+        border-radius: 4px;
+        position: absolute;
+        bottom: 40px;
+        left: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        padding: 2px;
+        z-index: 11;
+    }
+
+    .light {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #555;
+        transition: 0.3s;
+    }
+
+    .light.red.active {
+        background: #ff0000;
+        box-shadow: 0 0 10px #ff0000;
+    }
+
+    .light.green.active {
+        background: #00ff00;
+        box-shadow: 0 0 10px #00ff00;
+    }
+</style>
+
+<div class="scanner-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0">Smart Gate Controller</h3>
+            <p class="text-muted small">Lot: {{ lot.name }}</p>
+        </div>
+        <a href="/provider/dashboard" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i>
+            Back</a>
+    </div>
+
+    <!-- GATE ANIMATION -->
+    <div class="gate-wrapper">
+        <div class="post"></div>
+        <div class="traffic-light">
+            <div id="light-red" class="light red active"></div>
+            <div id="light-green" class="light green"></div>
+        </div>
+        <div id="barrier-arm" class="barrier shadow"></div>
+    </div>
+
+    <div class="scanner-card">
+        <div class="card-body p-2">
+            <!-- QR SCANNER AREA -->
+            <div id="reader"></div>
+        </div>
+
+        <div class="status-panel">
+            <h5 id="status-title" class="fw-bold">Ready to Scan</h5>
+            <p id="status-msg" class="text-muted small">Show customer QR code to the camera.</p>
+
+            <div id="vehicle-info" class="alert alert-light border d-none mt-3">
+                <div class="d-flex justify-content-between">
+                    <span>🚗 <strong id="veh-num">--</strong></span>
+                    <span>🅿️ <strong id="slot-num">--</strong></span>
+                </div>
+            </div>
+
+            <button id="manual-sim-btn" class="btn btn-sm btn-outline-primary mt-3 me-2" onclick="manualSimulate()">
+                Test Simulate (No Cam)
+            </button>
+            <a href="/provider/download_log/{{ lot.id }}" target="_blank" class="btn btn-sm btn-dark mt-3">
+                <i class="fas fa-file-pdf me-1"></i> Download Logs
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const lotId = "{{ lot.id }}";
+    let isProcessing = false;
+
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (isProcessing) return;
+
+        console.log(`Scan result: ${decodedText}`);
+
+        // Expected Format: "SMARTPARK TICKET\nBooking ID: 123..."
+        // We parse the Booking ID using Regex
+        const match = decodedText.match(/Booking ID:\s*([^\n\r]+)/);
+
+        if (match && match[1]) {
+            processTicket(match[1].trim());
+        } else {
+            console.log("Not a SmartPark Ticket");
+        }
+    }
+
+    function processTicket(bookingId) {
+        isProcessing = true;
+        document.getElementById('status-title').innerText = "Verifying...";
+        document.getElementById('status-msg').className = "text-primary fw-bold";
+
+        fetch('/api/scan_gate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ booking_id: bookingId, lot_id: lotId })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    openGate(data);
+                } else {
+                    denyGate(data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                isProcessing = false;
+            });
+    }
+
+    function openGate(data) {
+        const barrier = document.getElementById('barrier-arm');
+        const rLight = document.getElementById('light-red');
+        const gLight = document.getElementById('light-green');
+        const title = document.getElementById('status-title');
+        const msg = document.getElementById('status-msg');
+
+        // 1. Update UI
+        title.innerText = data.mode === 'entry' ? "ACCESS GRANTED (ENTRY)" : "EXIT APPROVED";
+        title.className = "fw-bold text-success";
+        msg.innerText = data.message;
+
+        document.getElementById('vehicle-info').classList.remove('d-none');
+        document.getElementById('veh-num').innerText = data.vehicle || 'Unknown';
+        document.getElementById('slot-num').innerText = data.slot;
+
+        // 2. Animate Gate
+        barrier.classList.add('open');
+        rLight.classList.remove('active');
+        gLight.classList.add('active');
+
+        // 3. Reset after 5 seconds
+        setTimeout(() => {
+            barrier.classList.remove('open');
+            rLight.classList.add('active');
+            gLight.classList.remove('active');
+
+            title.innerText = "Ready to Scan";
+            title.className = "fw-bold text-dark";
+            msg.innerText = "Show next ticket.";
+            msg.className = "text-muted small";
+            document.getElementById('vehicle-info').classList.add('d-none');
+
+            // Allow next scan
+            isProcessing = false;
+        }, 5000);
+    }
+
+    function denyGate(reason) {
+        document.getElementById('status-title').innerText = "ACCESS DENIED";
+        document.getElementById('status-title').className = "fw-bold text-danger";
+        document.getElementById('status-msg').innerText = reason;
+
+        // Brief pause before allowing retry
+        setTimeout(() => {
+            document.getElementById('status-title').innerText = "Ready to Scan";
+            document.getElementById('status-title').className = "fw-bold";
+            isProcessing = false;
+        }, 3000);
+    }
+
+    // Initialize HTML5 QR Code Scanner
+    // using "user" (front camera) or "environment" (rear camera)
+    const html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+        .catch(err => {
+            console.log("Environment camera failed, trying user camera...");
+            html5QrCode.start({ facingMode: "user" }, config, onScanSuccess)
+                .catch(err2 => {
+                    console.log("Camera error: " + err2);
+                    document.getElementById('status-msg').innerText = "Camera Access Failed. Please allow permissions.";
+                });
+        });
+
+    // For Demo Testing without QR
+    function manualSimulate() {
+        let bid = prompt("Enter Booking ID to simulate:");
+        if (bid) processTicket(bid);
+    }
+</script>
+
+{% endblock %}

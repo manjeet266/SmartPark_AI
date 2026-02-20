@@ -1,0 +1,55 @@
+/* General Body Tweaks */
+body {
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card Styling */
+.card {
+    border: none;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Video Container (The Red/Green Box Overlay Area) */
+.video-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.video-container img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Slot Buttons on the Customer View */
+.slot-btn {
+    width: 80px;
+    height: 80px;
+    margin: 5px;
+    font-weight: bold;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot-btn small {
+    font-size: 0.7em;
+    font-weight: normal;
+}
+
+/* Status Badges */
+.badge {
+    font-size: 0.9em;
+    padding: 8px 12px;
+}

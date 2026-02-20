@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --brand-primary: #4e73df;
+        --brand-dark: #1a1c23;
+        --soft-bg: #f4f7f6;
+    }
+
+    .create-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--soft-bg);
+        font-family: 'Inter', sans-serif;
+        padding: 40px 0;
+    }
+
+    .create-card {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header-visual {
+        background: var(--brand-dark);
+        color: white;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        border-bottom: 4px solid #f6c23e;
+    }
+
+    .brand-icon {
+        width: 60px;
+        height: 60px;
+        background: #f6c23e;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: var(--brand-dark);
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #4a5568;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid #edf2f7;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        background-color: #f8fafc;
+        transition: 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+        background-color: white;
+    }
+
+    .btn-create {
+        background: #1cc88a;
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 10px;
+        font-weight: 700;
+        width: 100%;
+        margin-top: 1rem;
+        transition: 0.3s;
+    }
+
+    .btn-create:hover {
+        background: #17a673;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="create-wrapper">
+    <div class="create-card">
+        <div class="card-header-visual">
+            <div class="brand-icon">
+                <i class="fas fa-parking"></i>
+            </div>
+            <h4 class="fw-bold mb-0">List Your Parking</h4>
+            <p class="text-white-50 small mt-2">Start earning from your space today</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <form action="/provider/create_lot" method="POST" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label class="form-label">Lot Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Central Mall Parking"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Location / City</label>
+                    <input type="text" name="location" class="form-control" placeholder="e.g. New York, NY" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label mb-2">Pin Location on Map</label>
+
+                    <!-- Search and Auto-locate Controls -->
+                    <div class="input-group mb-2">
+                        <input type="text" id="mapSearchInput" class="form-control"
+                            placeholder="Search area (e.g. MG Road, Bangalore)">
+                        <button type="button" id="searchLocationBtn" class="btn btn-outline-secondary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button type="button" id="getLocationBtn" class="btn btn-outline-primary">
+                            <i class="fas fa-location-arrow"></i> My Location
+                        </button>
+                    </div>
+
+                    <div id="map" style="height: 300px; border-radius: 8px; z-index: 1;"></div>
+                    <small class="text-muted d-block mt-1">
+                        <i class="fas fa-info-circle small me-1"></i>You can search, use "My Location", or drag the pin
+                        to adjust.
+                    </small>
+                    <input type="hidden" name="latitude" id="latInput">
+                    <input type="hidden" name="longitude" id="lngInput">
+                </div>
+
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Initialize map
+                        var map = L.map('map').setView([20, 0], 2);
+                        var marker;
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        // --- Core Functions from sample.html adapted for Form ---
+
+                        function updateUI(lat, lon) {
+                            // Update hidden inputs
+                            document.getElementById('latInput').value = lat;
+                            document.getElementById('lngInput').value = lon;
+
+                            // Fetch and update address text input
+                            getAddress(lat, lon);
+                        }
+
+                        function setMapMarker(lat, lon) {
+                            if (marker) {
+                                marker.setLatLng([lat, lon]);
+                            } else {
+                                marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+                                // Listen to drag events on the marker
+                                marker.on('dragend', function (event) {
+                                    var position = event.target.getLatLng();
+                                    updateUI(position.lat, position.lng);
+                                });
+                            }
+                            map.setView([lat, lon], 16);
+                        }
+
+                        function getAddress(lat, lon) {
+                            const locationInput = document.querySelector('input[name="location"]');
+                            locationInput.style.opacity = '0.6'; // Loading indication
+
+                            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lon}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const addr = data.address || {};
+
+                                    // Construct formatted address string
+                                    const components = [];
+                                    if (addr.house_number) components.push(addr.house_number);
+                                    if (addr.road) components.push(addr.road);
+                                    if (addr.suburb) components.push(addr.suburb);
+                                    else if (addr.village) components.push(addr.village);
+
+                                    if (addr.city) components.push(addr.city);
+                                    else if (addr.town) components.push(addr.town);
+                                    else if (addr.county) components.push(addr.county);
+
+                                    if (addr.state) components.push(addr.state);
+                                    if (addr.postcode) components.push(addr.postcode);
+                                    if (addr.country) components.push(addr.country);
+
+                                    // Join non-empty components
+                                    const fullAddress = components.filter(c => c).join(', ');
+                                    locationInput.value = fullAddress || data.display_name || "Address not found";
+                                })
+                                .catch((err) => {
+                                    console.error("Address fetch error:", err);
+                                    locationInput.value = "Unable to fetch address";
+                                })
+                                .finally(() => {
+                                    locationInput.style.opacity = '1';
+                                });
+                        }
+
+                        // --- Event Handlers ---
+
+                        // 1. Get Live Location Button
+                        document.getElementById('getLocationBtn').addEventListener('click', function () {
+                            if (!navigator.geolocation) {
+                                alert("Geolocation is not supported by your browser");
+                                return;
+                            }
+
+                            const btn = this;
+                            const originalText = btn.innerHTML;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...';
+
+                            navigator.geolocation.getCurrentPosition(
+                                (position) => {
+                                    const lat = position.coords.latitude;
+                                    const lon = position.coords.longitude;
+
+                                    updateUI(lat, lon);
+                                    setMapMarker(lat, lon);
+
+                                    btn.innerHTML = '<i class="fas fa-check"></i> Found';
+                                    setTimeout(() => btn.innerHTML = originalText, 2000);
+                                },
+                                () => {
+                                    alert("Unable to retrieve your location");
+                                    btn.innerHTML = originalText;
+                                },
+                                { enableHighAccuracy: true }
+                            );
+                        });
+
+                        // 2. Map Click
+                        map.on("click", function (e) {
+                            const lat = e.latlng.lat;
+                            const lon = e.latlng.lng;
+
+                            updateUI(lat, lon);
+                            setMapMarker(lat, lon);
+                        });
+
+                        // 3. Search Functionality (Retained & Integrated)
+                        async function searchLocation(query) {
+                            if (!query) return;
+                            const searchBtn = document.getElementById('searchLocationBtn');
+                            const originalContent = searchBtn.innerHTML;
+                            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                            try {
+                                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                                const data = await response.json();
+                                if (data && data.length > 0) {
+                                    const lat = parseFloat(data[0].lat);
+                                    const lon = parseFloat(data[0].lon);
+                                    updateUI(lat, lon);
+                                    setMapMarker(lat, lon);
+                                } else {
+                                    alert('Location not found.');
+                                }
+                            } catch (e) {
+                                console.error(e);
+                                alert('Search failed.');
+                            } finally {
+                                searchBtn.innerHTML = originalContent;
+                            }
+                        }
+
+                        document.getElementById('searchLocationBtn').addEventListener('click', function () {
+                            searchLocation(document.getElementById('mapSearchInput').value);
+                        });
+
+                        document.getElementById('mapSearchInput').addEventListener('keypress', function (e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                searchLocation(this.value);
+                            }
+                        });
+
+                        // Render fix
+                        setTimeout(function () { map.invalidateSize(); }, 500);
+                    });
+                </script>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">UPI ID (for payments)</label>
+                        <input type="text" name="upi_id" class="form-control" placeholder="merchant@upi" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Hourly Rate (₹)</label>
+                    <input type="number" step="0.5" name="hourly_rate" class="form-control" placeholder="5.0" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Reference Image (Top View)</label>
+                    <input type="file" name="ref_image" class="form-control" accept="image/*" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">CCTV Video Stream</label>
+                    <input type="file" name="video_file" class="form-control" accept="video/*" required>
+                </div>
+
+                <div class="mb-4 form-check">
+                    <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                    <label class="form-check-label small" for="termsCheck">
+                        I agree to the <a href="/terms" target="_blank" class="text-decoration-none">Terms and
+                            Conditions</a> and verify that I am the authorized owner of this parking space.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-create">
+                    Create Lot & Setup Slots
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

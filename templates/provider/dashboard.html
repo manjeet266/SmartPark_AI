@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --brand-primary: #4e73df;
+        --brand-success: #1cc88a;
+        --brand-info: #36b9cc;
+        --brand-dark: #1a1c23;
+        --soft-bg: #f8f9fc;
+    }
+
+    body {
+        background-color: var(--soft-bg);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-weight: 800;
+        color: var(--brand-dark);
+        letter-spacing: -0.5px;
+    }
+
+    /* Metric Card Styling */
+    .metric-card {
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .metric-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .metric-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0;
+    }
+
+    .metric-label {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        opacity: 0.8;
+    }
+
+    .metric-icon {
+        font-size: 2rem;
+        opacity: 0.3;
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Section Headers */
+    .section-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--brand-dark);
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-title i {
+        margin-right: 10px;
+        color: var(--brand-primary);
+    }
+
+    /* Table Customization */
+    .custom-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    }
+
+    .table thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #858796;
+        background-color: #f8fafc;
+        border: none;
+        padding: 1rem;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-top: 1px solid #e3e6f0;
+    }
+
+    .lot-img {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Scrollable Activity Table */
+    .activity-scroll-view {
+        max-height: 400px;
+        overflow-y: auto;
+        border-radius: 0 0 15px 15px;
+        /* Match card radius at bottom */
+    }
+
+    .activity-scroll-view thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        /* Subtle shadow line */
+    }
+</style>
+
+<div class="container py-4">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="page-title">Provider Dashboard</h2>
+            <p class="text-muted small">Manage your parking facilities and track revenue in real-time.</p>
+        </div>
+        <div class="text-end">
+            <div id="liveClock" class="fw-bold mb-1" style="font-size: 1.1rem; color: var(--brand-primary);"></div>
+            <small id="currentDate" class="text-muted fw-bold d-block mb-3"></small>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/provider/create_lot" class="btn btn-primary btn-action shadow-sm">
+                    <i class="fas fa-plus me-1"></i> Add New Lot
+                </a>
+                <a href="/logout" class="btn btn-outline-danger btn-action">Logout</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            // Time
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString([], timeOptions);
+
+            // Date
+            const dateOptions = { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('currentDate').innerText = now.toLocaleDateString('en-US', dateOptions);
+        }
+
+        // Initial call then interval
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <div class="card metric-card bg-success text-white shadow">
+                <div class="card-body position-relative">
+                    <p class="metric-label">Total Lifetime Income</p>
+                    <h3 class="metric-value">₹{{ total_income }}</h3>
+                    <i class="fas fa-wallet metric-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card metric-card bg-info text-white shadow">
+                <div class="card-body position-relative">
+                    <p class="metric-label">Today's Revenue</p>
+                    <h3 class="metric-value">₹{{ daily_income }}</h3>
+                    <i class="fas fa-calendar-day metric-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="section-title"><i class="fas fa-parking"></i> My Parking Facilities</h4>
+    <div class="card custom-card mb-5 shadow-sm">
+        <div class="card-body p-0">
+            {% if not lots %}
+            <div class="text-center py-5">
+                <i class="fas fa-map-marked-alt fa-3x text-muted opacity-25 mb-3"></i>
+                <p class="text-muted">You haven't added any parking lots yet.</p>
+                <a href="/provider/create_lot" class="btn btn-primary btn-sm mt-2">Get Started</a>
+            </div>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Facility Details</th>
+                            <th class="text-end">Management Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lot in lots %}
+                        <tr>
+                            <td width="140">
+                                <img src="{{ url_for('static', filename=lot.ref_image_path) }}" class="lot-img"
+                                    style="height: 70px; width: 110px; object-fit: cover;">
+                            </td>
+                            <td>
+                                <h6 class="fw-bold mb-1">{{ lot.name }}</h6>
+                                <span class="badge bg-light text-primary border px-2 py-1">
+                                    ₹{{ lot.hourly_rate }}/hr Rate
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="/provider/edit_lot/{{ lot.id }}"
+                                        class="btn btn-outline-warning btn-action">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="/provider/setup/{{ lot.id }}" class="btn btn-outline-primary btn-action">
+                                        <i class="fas fa-th-large"></i> Manage Slots
+                                    </a>
+                                    <a href="/provider/gate_scanner/{{ lot.id }}"
+                                        class="btn btn-info btn-action text-white">
+                                        <i class="fas fa-torii-gate"></i> Gate
+                                    </a>
+                                    <form action="/provider/delete_lot/{{ lot.id }}" method="POST" class="d-inline"
+                                        onsubmit="return confirm('⚠️ Danger: This will delete the lot and all associated data. Proceed?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-action">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <h4 class="section-title"><i class="fas fa-history"></i> Recent Booking Activity</h4>
+    <div class="card custom-card shadow-sm mb-5">
+        <div class="card-body p-0">
+            {% if not bookings %}
+            <div class="text-center py-4">
+                <p class="text-muted mb-0">No booking history recorded yet.</p>
+            </div>
+            {% else %}
+            <div class="table-responsive activity-scroll-view">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID / Customer</th>
+                            <th>Lot & Slot</th>
+                            <th>Amount</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bookings %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div
+                                        class="avatar-sm bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2">
+                                        <i class="fas fa-ticket-alt small"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block fw-bold small text-primary">#{{ b.id }}</span>
+                                        <span class="small text-dark">{{ b.customer_name }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="small fw-semibold">{{ b.slot.parking_lot.name }}</span><br>
+                                <span class="text-muted x-small">Slot: {{ b.slot.slot_label }}</span>
+                            </td>
+                            <td class="fw-bold text-success">₹{{ b.amount }}</td>
+                            <td class="small text-muted">
+                                <i class="far fa-clock me-1"></i> {{ b.start_time.strftime('%b %d, %I:%M %p') }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- REVIEWS SECTION -->
+    <h4 class="section-title"><i class="fas fa-star"></i> Customer Reviews</h4>
+    <div class="card custom-card shadow-sm mb-5">
+        <div class="card-body p-4">
+            {% if not reviews %}
+            <div class="text-center py-4">
+                <p class="text-muted mb-0">No reviews yet.</p>
+            </div>
+            {% else %}
+            <div class="row g-3">
+                {% for r in reviews %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong class="text-dark">{{ r.parking_lot.name }}</strong>
+                                <span class="badge bg-light text-warning border">
+                                    {{ r.rating }} <i class="fas fa-star"></i>
+                                </span>
+                            </div>
+                            <h6 class="small fw-bold mb-1">{{ r.user.name }}</h6>
+                            <p class="text-muted small mb-2 fst-italic">"{{ r.comment }}"</p>
+                            <small class="text-muted opacity-50" style="font-size: 0.7rem;">
+                                <i class="far fa-clock me-1"></i> {{ r.created_at.strftime('%d %b %Y') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

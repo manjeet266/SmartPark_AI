@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SmartPark ER Diagram</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .mermaid {
+            margin-bottom: 40px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</head>
+
+<body>
+    <h1>SmartPark Project - Entity Relationship (ER) Diagram</h1>
+
+    <h2>Database Schema Visualization</h2>
+    <div class="mermaid">
+        erDiagram
+        User {
+        int id PK
+        string name
+        string uname "Unique"
+        string mobile
+        string email
+        string location
+        string password
+        string role "provider/customer/admin"
+        string status
+        boolean is_verified
+        string rdate
+        }
+
+        ParkingLot {
+        int id PK
+        int provider_id FK
+        string name
+        string location
+        string video_path
+        string ref_image_path
+        float hourly_rate
+        string upi_id
+        float latitude
+        float longitude
+        }
+
+        Slot {
+        int id PK
+        int parking_lot_id FK
+        string slot_label
+        text points "JSON Coordinates"
+        }
+
+        Booking {
+        int id PK
+        int slot_id FK
+        int user_id FK "Customer"
+        string ticket_uuid "Unique"
+        string customer_name
+        string phone_number
+        string vehicle_number
+        datetime start_time
+        datetime end_time
+        datetime check_in_time
+        datetime check_out_time
+        float amount
+        string payment_status
+        string payment_method
+        boolean is_active
+        }
+
+        Review {
+        int id PK
+        int parking_lot_id FK
+        int user_id FK
+        int rating
+        text comment
+        datetime created_at
+        }
+
+        %% Relationships
+        User ||--o{ ParkingLot : "owns (Provider)"
+        User ||--o{ Booking : "makes (Customer)"
+        User ||--o{ Review : "writes"
+
+        ParkingLot ||--o{ Slot : "contains"
+        ParkingLot ||--o{ Review : "has"
+
+        Slot ||--o{ Booking : "is_reserved_for"
+    </div>
+
+    <h2>Entity Descriptions</h2>
+    <ul>
+        <li><strong>User:</strong> Stores all user accounts (Admins, Providers, Customers). Differentiated by the
+            <code>role</code> field.</li>
+        <li><strong>ParkingLot:</strong> Represents a parking facility managed by a Provider. Contains location data and
+            media paths (video/image).</li>
+        <li><strong>Slot:</strong> Individual parking spaces within a ParkingLot. Stores geometric coordinates
+            (<code>points</code>) for drawing on the UI.</li>
+        <li><strong>Booking:</strong> Records a reservation transaction. Links a Customer to a Slot for a specific time
+            range. Tracks payment and gate entry/exit times.</li>
+        <li><strong>Review:</strong> Ratings and comments left by Users for a specific ParkingLot.</li>
+    </ul>
+
+</body>
+
+</html>
